@@ -3,7 +3,7 @@
 //  Bluetooth Serial Cordova Plugin
 //
 //  Created by Don Coleman on 5/21/13.
-//
+//  Modified by Viet Huynh on 8/9/23.
 //
 
 #ifndef SimpleSerial_MEGBluetoothSerial_h
@@ -11,7 +11,7 @@
 
 #import <Cordova/CDV.h>
 #import "BLE.h"
-
+#import <AVFoundation/AVFoundation.h>
 @interface MEGBluetoothSerial : CDVPlugin <BLEDelegate> {
     BLE *_bleShield;
     NSString* _connectCallbackId;
@@ -20,6 +20,7 @@
     NSString* _rssiCallbackId;
     NSMutableString *_buffer;
     NSString *_delimiter;
+    AVAudioSession *audioSession;
 }
 
 - (void)connect:(CDVInvokedUrlCommand *)command;

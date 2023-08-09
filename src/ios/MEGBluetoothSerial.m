@@ -360,26 +360,24 @@
 }
 
 - (NSMutableArray*) getPeripheralList {
-    NSError *error;
-    AVAudioSession *audioSession = [AVAudioSession sharedInstance];
-    // close down our current session...
-    [audioSession setActive:NO error:nil];
-    
-    // start a new audio session. Without activation, the default route will always be (inputs: null, outputs: Speaker)
-    [audioSession setActive:YES error:nil];
-    
     NSMutableArray *peripherals = [NSMutableArray array];
-    // Open a session and see what our default is...
-    if (![audioSession setCategory:AVAudioSessionCategoryPlayAndRecord withOptions:AVAudioSessionCategoryOptionAllowBluetooth error:&error]) {
-        return peripherals;
+    if(audioSession == nil){
+        audioSession = [AVAudioSession sharedInstance];
+        NSError *error;
+        // start a new audio session. Without activation, the default route will always be (inputs: null, outputs: Speaker)
+        [audioSession setActive:YES error:nil];
+        
+        // Open a session and see what our default is...
+        if (![audioSession setCategory:AVAudioSessionCategoryRecord withOptions:AVAudioSessionCategoryOptionAllowBluetooth error:&error]) {
+            return peripherals;
+        }
     }
+    
     // In case both headphones and bluetooth are connected, detect bluetooth by inputs
-        // Condition: iOS7 and Bluetooth input available
+    // Condition: iOS7 and Bluetooth input available
     if ([audioSession respondsToSelector:@selector(availableInputs)]) {
         for (AVAudioSessionPortDescription *desc in [audioSession availableInputs]){
             if (desc.portType == AVAudioSessionPortBluetoothHFP || desc.portType == AVAudioSessionPortBluetoothA2DP || desc.portType == AVAudioSessionPortBluetoothLE) {
-                
-                NSError *error;
                 NSMutableDictionary *peripheral = [NSMutableDictionary dictionary];
                 
                 NSString *uuid = desc.UID;
