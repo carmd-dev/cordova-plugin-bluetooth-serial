@@ -3,6 +3,7 @@
 //  Bluetooth Serial Cordova Plugin
 //
 //  Created by Don Coleman on 5/21/13.
+//  Modified by Viet Huynh on 8/9/23.
 //
 //
 
@@ -361,56 +362,40 @@
 - (NSMutableArray*) getPeripheralList {
     NSError *error;
     AVAudioSession *audioSession = [AVAudioSession sharedInstance];
-    [audioSession setCategory:AVAudioSessionCategoryRecord withOptions:audioSession.categoryOptions|AVAudioSessionCategoryOptionAllowBluetooth
-                        error:&error];
+    // close down our current session...
+    [audioSession setActive:NO error:nil];
+    
+    // start a new audio session. Without activation, the default route will always be (inputs: null, outputs: Speaker)
     [audioSession setActive:YES error:nil];
-
+    
     NSMutableArray *peripherals = [NSMutableArray array];
-
-    for (AVAudioSessionPortDescription *desc in [audioSession availableInputs]){
-        if (desc.portType == AVAudioSessionPortBluetoothHFP || desc.portType == AVAudioSessionPortBluetoothA2DP || desc.portType == AVAudioSessionPortBluetoothLE) {
-            
-            NSError *error;
-            NSMutableDictionary *peripheral = [NSMutableDictionary dictionary];
-
-            NSString *uuid = desc.UID;
-            [peripheral setObject: uuid forKey: @"uuid"];
-            [peripheral setObject: uuid forKey: @"id"];
-
-            NSString *name = desc.portName;
-            if (!name) {
-                name = [peripheral objectForKey:@"uuid"];
+    // Open a session and see what our default is...
+    if (![audioSession setCategory:AVAudioSessionCategoryPlayAndRecord withOptions:AVAudioSessionCategoryOptionAllowBluetooth error:&error]) {
+        return peripherals;
+    }
+    // In case both headphones and bluetooth are connected, detect bluetooth by inputs
+        // Condition: iOS7 and Bluetooth input available
+    if ([audioSession respondsToSelector:@selector(availableInputs)]) {
+        for (AVAudioSessionPortDescription *desc in [audioSession availableInputs]){
+            if (desc.portType == AVAudioSessionPortBluetoothHFP || desc.portType == AVAudioSessionPortBluetoothA2DP || desc.portType == AVAudioSessionPortBluetoothLE) {
+                
+                NSError *error;
+                NSMutableDictionary *peripheral = [NSMutableDictionary dictionary];
+                
+                NSString *uuid = desc.UID;
+                [peripheral setObject: uuid forKey: @"uuid"];
+                [peripheral setObject: uuid forKey: @"id"];
+                
+                NSString *name = desc.portName;
+                if (!name) {
+                    name = [peripheral objectForKey:@"uuid"];
+                }
+                [peripheral setObject: name forKey: @"name"];
+                
+                [peripherals addObject:peripheral];
             }
-            [peripheral setObject: name forKey: @"name"];
-
-            [peripherals addObject:peripheral];
         }
     }
-    /*
-    NSMutableArray *peripherals = [NSMutableArray array];
-     
-    for (int i = 0; i < _bleShield.peripherals.count; i++) {
-        NSMutableDictionary *peripheral = [NSMutableDictionary dictionary];
-        CBPeripheral *p = [_bleShield.peripherals objectAtIndex:i];
-
-        NSString *uuid = p.identifier.UUIDString;
-        [peripheral setObject: uuid forKey: @"uuid"];
-        [peripheral setObject: uuid forKey: @"id"];
-
-        NSString *name = [p name];
-        if (!name) {
-            name = [peripheral objectForKey:@"uuid"];
-        }
-        [peripheral setObject: name forKey: @"name"];
-
-        NSNumber *rssi = [p btsAdvertisementRSSI];
-        if (rssi) { // BLEShield doesn't provide advertised RSSI
-            [peripheral setObject: rssi forKey:@"rssi"];
-        }
-
-        [peripherals addObject:peripheral];
-    }
-     */
     return peripherals;
 }
 
