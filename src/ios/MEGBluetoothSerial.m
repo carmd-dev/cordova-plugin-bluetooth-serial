@@ -364,9 +364,6 @@
     if(audioSession == nil){
         audioSession = [AVAudioSession sharedInstance];
         NSError *error;
-        // start a new audio session. Without activation, the default route will always be (inputs: null, outputs: Speaker)
-        [audioSession setActive:YES error:nil];
-        
         // Open a session and see what our default is...
         if (![audioSession setCategory:AVAudioSessionCategoryRecord withOptions:AVAudioSessionCategoryOptionAllowBluetooth error:&error]) {
             return peripherals;
