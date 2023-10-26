@@ -374,7 +374,11 @@
     // Condition: iOS7 and Bluetooth input available
     if ([audioSession respondsToSelector:@selector(availableInputs)]) {
         for (AVAudioSessionPortDescription *desc in [audioSession availableInputs]){
-            if (desc.portType == AVAudioSessionPortBluetoothHFP || desc.portType == AVAudioSessionPortBluetoothA2DP || desc.portType == AVAudioSessionPortBluetoothLE) {
+            if (desc.portType == AVAudioSessionPortBluetoothHFP || 
+                desc.portType == AVAudioSessionPortBluetoothA2DP || 
+                desc.portType == AVAudioSessionPortBluetoothLE ||
+                desc.portType == AVAudioSessionPortCarAudio ||
+                desc.portType == AVAudioSessionPortAirPlay) {
                 NSMutableDictionary *peripheral = [NSMutableDictionary dictionary];
                 
                 NSString *uuid = desc.UID;
