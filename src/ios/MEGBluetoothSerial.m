@@ -361,26 +361,19 @@
 
 - (NSMutableArray*) getPeripheralList {
     NSMutableArray *peripherals = [NSMutableArray array];
-    if(audioSession == nil){
-        audioSession = [AVAudioSession sharedInstance];
-        NSError *error;
-        // Open a session and see what our default is...
-        if (![audioSession setCategory:AVAudioSessionCategoryRecord withOptions:AVAudioSessionCategoryOptionAllowBluetooth error:&error]) {
-            return peripherals;
-        }
+    audioSession = [AVAudioSession sharedInstance];
+    NSError *error;
+    // Open a session and see what our default is...
+    if (![audioSession setCategory:AVAudioSessionCategoryRecord withOptions:AVAudioSessionCategoryOptionAllowBluetooth error:&error]) {
+        return peripherals;
     }
-    
     // In case both headphones and bluetooth are connected, detect bluetooth by inputs
     // Condition: iOS7 and Bluetooth input available
     if ([audioSession respondsToSelector:@selector(availableInputs)]) {
         for (AVAudioSessionPortDescription *desc in [audioSession availableInputs]){
-            if (desc.portType == AVAudioSessionPortBluetoothHFP || 
-                desc.portType == AVAudioSessionPortBluetoothA2DP || 
-                desc.portType == AVAudioSessionPortBluetoothLE ||
-                desc.portType == AVAudioSessionPortCarAudio ||
-                desc.portType == AVAudioSessionPortAirPlay) {
+            NSLog(@"available Input id: %@ - %@ - %@", desc.UID, desc.portType, desc.portName);
+            if (desc.portType == AVAudioSessionPortBluetoothHFP || desc.portType == AVAudioSessionPortBluetoothA2DP || desc.portType == AVAudioSessionPortBluetoothLE) {
                 NSMutableDictionary *peripheral = [NSMutableDictionary dictionary];
-                
                 NSString *uuid = desc.UID;
                 [peripheral setObject: uuid forKey: @"uuid"];
                 [peripheral setObject: uuid forKey: @"id"];
